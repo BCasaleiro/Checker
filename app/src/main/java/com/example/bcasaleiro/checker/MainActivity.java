@@ -4,6 +4,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.os.Bundle;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -43,6 +44,32 @@ public class MainActivity extends AppCompatActivity {
 
         recyclerView.setAdapter(rvAdapter);
 
+        final ItemTouchHelper mIth = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP|ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
+            @Override
+            public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+
+                if(getMovementFlags(recyclerView, viewHolder) != ItemTouchHelper.ACTION_STATE_DRAG) {
+                    return true;
+                }
+
+                return false;
+            }
+
+            @Override
+            public void onMoved(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, int fromPos, RecyclerView.ViewHolder target, int toPos, int x, int y) {
+                Log.d(DEBUGTAG, "Moved " + myTasks.get(fromPos) + " from: " + fromPos + " to: " + toPos);
+
+                ((TasksAdapter) rvAdapter).moveItem(fromPos, toPos);
+            }
+
+            @Override
+            public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+                Log.d(DEBUGTAG, "Swiped " + myTasks.get(viewHolder.getAdapterPosition()).toString());
+                ((TasksAdapter) rvAdapter).popItem(viewHolder.getAdapterPosition());
+            }
+        });
+
+        mIth.attachToRecyclerView(recyclerView);
 
     }
 
@@ -80,7 +107,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolderItem viewHolderItem, int position) {
-            Log.d(DEBUGTAG, "Item: " + this.getItem(position).getName() + " at the position " + position);
+            Log.d(DEBUGTAG, "Binded Item: " + this.getItem(position).getName() + " at the position " + position);
 
             viewHolderItem.setNameTextView(this.getItem(position).getName());
         }
@@ -114,6 +141,14 @@ public class MainActivity extends AppCompatActivity {
             notifyItemRemoved(position);
 
             return auxTask;
+        }
+
+        public void moveItem(int fromPos, int toPos) {
+            Task task = myTasks.get(fromPos);
+            myTasks.remove(fromPos);
+            myTasks.add(toPos, task);
+
+            notifyItemMoved(fromPos, toPos);
         }
     }
 
