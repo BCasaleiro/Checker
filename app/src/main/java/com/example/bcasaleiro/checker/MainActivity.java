@@ -1,5 +1,6 @@
 package com.example.bcasaleiro.checker;
 
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -19,11 +20,11 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-
     private final String DEBUGTAG = "MainAcivity";
 
     private RecyclerView recyclerView;
     private RecyclerView.Adapter rvAdapter;
+    private FloatingActionButton fab;
 
     private ArrayList<Task> myTasks;
 
@@ -37,12 +38,20 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
+        fab = (FloatingActionButton) findViewById(R.id.fab);
+
         rvAdapter = new TasksAdapter();
 
         ((TasksAdapter)rvAdapter).addItem(new Task("O casaleiro é fixe"), 0);
         ((TasksAdapter)rvAdapter).addItem(new Task("O mendes é conas"), 1);
 
         recyclerView.setAdapter(rvAdapter);
+
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                ((TasksAdapter)rvAdapter).addItemToEnd(new Task("O casaleiro é brutal"));
+            }
+        });
 
         final ItemTouchHelper mIth = new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(ItemTouchHelper.UP|ItemTouchHelper.DOWN, ItemTouchHelper.RIGHT) {
             @Override
@@ -124,6 +133,11 @@ public class MainActivity extends AppCompatActivity {
         public void addItem(Task task, int position) {
             myTasks.add(position, task);
             notifyItemInserted(position);
+        }
+
+        public void addItemToEnd(Task task) {
+            myTasks.add(myTasks.size(), task);
+            notifyItemInserted(myTasks.size() - 1);
         }
 
         public Task popItem(int position) {
